@@ -5,10 +5,26 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+          .nivv, .cantidad{
+            display: flex;
+            flex-direction: row;
+             justify-items: flex-start;
+          }
+    </style>
 </head>
 <body>
     <canvas id="space" width="700" height="250" style="border: 1px solid black "></canvas>
-  <script src="space.js"></script>
+    <div class="nivv">
+      <h1>Nivel:</h1>
+      <h1 id="nivConteo">1</h1>
+    </div>
+    <div class="cantidad">
+      <h1>Disparos:</h1>
+      <h1 id="dispConteo">Ilimitados</h1>
+
+    </div>
+    <script src="space.js"></script>
 
 </body>
 </html>
