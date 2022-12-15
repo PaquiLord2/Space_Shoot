@@ -1,5 +1,12 @@
 var cuad = document.getElementById("space");
 var ctx = cuad.getContext("2d");
+
+let $h1Nivel = document.getElementById("nivConteo")
+let $h1Cantidad = document.getElementById("dispConteo");
+
+
+let choqs = 0,nivel = 0,disparos=30,quitar=0;
+
 class Nodo{
     constructor(data,next,prev){
         this.data = data;
@@ -127,7 +134,7 @@ mover(contexto,direccion){
         this.y = this.y + 10;
     }
     
-    if (this.yin<0){
+    if (this.y<0){
         this.y = this.y + 10
     }
 
@@ -160,7 +167,7 @@ colision(disparo,cuadrado,contexto){
         return true
     }
     if(x1 > contexto.width-10){
-        return true
+        return [true,1]
     }
 
     cuadrado = cuadrado.next
@@ -201,6 +208,16 @@ class Columna3 extends Cola{
     }
 
 }
+class Columna4 extends Cola{
+    constructor(){
+        super();
+    }
+    clonCola(data){
+        this.agregarCola(data);
+    }
+}
+
+
 class CuadradoColumna {
     constructor(x,y,xf,yf){
         this.x = x;
@@ -242,7 +259,8 @@ const nuevaCola = new Cola()
 const nuevaColumna = new Columna1();
 const nuevaColumna2 = new Columna2();
 const nuevaColumna3 = new Columna3();
-let en = 20,en2 = 100;
+const nuevaColumna4 = new Columna4();
+let en = 20,en2 = 100,en3=150;
 
 function aleatorioo(){
 for (let u=0;u<20;u++){
@@ -288,15 +306,18 @@ function noRepetirse(){
 noRepetirse();
 for(let u = 0;u<6;u++){
     const column = new CuadradoColumna(50,en,10,10);
-    column.dibujar(ctx);
     nuevaColumna.clonCola(column);
     en = en + 10;
 }
 for(let u = 0;u<6;u++){
     const column = new CuadradoColumna(250,en2,10,10);
-    column.dibujar(ctx);
     nuevaColumna2.clonCola(column);
     en2 = en2 + 10;
+}
+for(let u = 0;u<6;u++){
+    const column = new CuadradoColumna(550,en3,10,10);
+    nuevaColumna4.clonCola(column);
+    en3 = en3 + 10;
 }
 
 
@@ -311,49 +332,103 @@ function mover(){
      colm2 = nuevaColumna2.head;
      colmC = nuevaColumna.head;
      colm2C = nuevaColumna2.head;
+     colm3 = nuevaColumna4.tail;
+     colm3C = nuevaColumna4.head;
     als = nuevaColumna3.head;
 
     while(als){
         als.data.dibujar(ctx,'Orange')
         als = als.next
     }
+    if(nivel>0){
      while(colm){
         colm.data.moverAbajo(ctx);
         colm = colm.prev;
         
      }
+    } 
+    if(nivel>1){
      while(colm2){
         colm2.data.moverArriba(ctx);
         colm2 = colm2.next;
-       
+     }}
+     if(nivel>2){
+     while(colm3){
+        colm3.data.moverAbajo(ctx);
+        colm3 = colm3.prev;
      }
-   
+    }
      als = nuevaColumna3.head;
      if(cabeza!==null){
       let entr = 0;
      while(cabeza){
        entr = 0;
         cabeza.data.movPosicion(ctx)
+        if(nivel>0){
         if(cabeza.data.colision(cabeza,colmC,cuad)){
               nuevaCola.quitarMedio( cabeza.data);
               entr++;
         }
-        if (cabeza.data.colision(cabeza,colm2C,cuad)){
+    }
+      if(nivel>1){
+    if (cabeza.data.colision(cabeza,colm2C,cuad)){
             nuevaCola.quitarMedio( cabeza.data);
             entr++;
         }
-        if(entr===0){
-        if(cabeza.data.colision(cabeza,als,cuad)){
-           nuevaColumna3.quitarMedio(cabeza.data)
+    }
+    if(nivel>2){
+    if (cabeza.data.colision(cabeza,colm3C,cuad)){
+            nuevaCola.quitarMedio( cabeza.data);
+            entr++;
         }
     }
+        if(entr===0){
+            let vi;
+        if(vi = cabeza.data.colision(cabeza,als,cuad)){
+           if (vi[1]===1){
+            nuevaCola.quitarMedio(cabeza.data)
+           }else{
+            choqs++;
+            nuevaColumna3.quitarMedio(cabeza.data)
+           }
+        }
+    }
+
         cabeza = cabeza.next
         disp.dibujar(ctx,'Red') 
     }
 
 }
+if(nivel>=3 && choqs===20){
+    window.alert("Has ganado")
+    location.reload();
+}
+if(nivel>0 && disparos===0 && nuevaCola.size===0){
+    window.alert("has perdido")
+    location.reload();
+}
+  if(choqs===20){
+    choqs = 0;
+    nivel++;
+    let entr = nuevaCola.size;
+    let caa = nuevaCola.head;
+    for(let ir = 0;ir<entr;ir++){
+        caa.data.eliminar(ctx)
+        nuevaCola.quitarCabeza()
+        nuevaCola.next;
+    caa = caa.next
+    }
+
+    aleatorioo();
+    noRepetirse();
+    
+    disparos=30-quitar;
+    quitar=quitar+5;
+    $h1Cantidad.textContent = disparos;
+    $h1Nivel.textContent = nivel + 1; 
+  }
    clearInterval(idIntervalo);
-   idIntervalo = setInterval(mover,150);
+   idIntervalo = setInterval(mover,80);
 }
 
 let valor = []
@@ -361,12 +436,28 @@ this.addEventListener("keypress",(e)=>{
    valor = disp.mover(ctx,e.key)
 })
 
+function disparador(llave){
+    if (llave === 'k'){
+        //const nuevaBala = new Cursor(valor[0],valor[1],10,10)
+         const nuevaBala = new Cursor();
+         nuevaBala.posicion(valor[0],valor[1],10,10)
+        nuevaCola.agregarCola(nuevaBala)
+        }
+}
+
 this.addEventListener("keypress",(e)=>{
-    if (e.key === 'k'){
-    //const nuevaBala = new Cursor(valor[0],valor[1],10,10)
-     const nuevaBala = new Cursor();
-     nuevaBala.posicion(valor[0],valor[1],10,10)
-    nuevaCola.agregarCola(nuevaBala)
+   if(nivel===0){
+    this.disparador(e.key);
+   }
+   if(nivel >= 1 && disparos>0){
+    this.disparador(e.key);
+    if (e.key === 'k')
+    {
+    disparos--;
+    $h1Cantidad.textContent = disparos;
+    }
+   
+   }
   
-};
+    
 })
